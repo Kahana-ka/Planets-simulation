@@ -359,7 +359,7 @@ std::string Gnu_plotter::animate_curve_plot(int x_column,int y_column,const Axis
 
     std::string command;
 
-    const int lines_number = sys_utils::count_files_lines(data[0].get_path());
+    const int lines_number = static_cast<int>( sys_utils::count_files_lines(data[0].get_path()));
 
     command += set_canvas_cmd();
     command += set_axis_limit_cmd(a_limit);
