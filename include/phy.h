@@ -15,6 +15,8 @@ namespace phy {
 		Vector3() = default;
 		Vector3 operator+(const Vector3& rv3) const;
 		Vector3 operator-(const Vector3& rv3) const;
+		Vector3 operator/(double rh_value) const;
+		Vector3 operator*(double rh_value) const;
 		double module() const;
 		double dot(const Vector3& v3) const;
 		Vector3 cross(const Vector3& v3) const;

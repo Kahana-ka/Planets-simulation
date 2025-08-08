@@ -105,7 +105,7 @@ namespace rk3 {
 	constexpr int data_keep = 1;
 
 
-	class RK3_solver : public rk::RK_base {
+	class RK3_solver : public rk::RK_base<3> {
 
 	private:
 		void next_step();
