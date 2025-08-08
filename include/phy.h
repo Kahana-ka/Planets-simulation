@@ -8,69 +8,74 @@
 
 namespace phy {
 
-	// !=!=!=!=!=!=!=!=!=!=!=!=!=! Per ora settata ad 1, cambiare quando implemento la dimensionalita' !=!=!=!=!=!=!=!=!=!=!=!=!=!
-	constexpr double G = 1;
+	class Vector3 {
+	public:
+		double x{0}, y{0}, z{0};
+		Vector3(const double x,const double y,const double z) : x(x), y(y), z(z) {}
+		Vector3() = default;
+		Vector3 operator+(const Vector3& rv3) const;
+		Vector3 operator-(const Vector3& rv3) const;
+		double module() const;
+		double dot(const Vector3& v3) const;
+		Vector3 cross(const Vector3& v3) const;
+		double distance(const Vector3& v3) const;
+	};
 
-	/** Struttura che contiene i valori di un pianeta, posizione velocita' massa raggio del pianeta ed un id.
-	*/
 	struct Planet {
-		std::vector<double> pos_x;
-		std::vector<double> pos_y;
-		std::vector<double> pos_z;
-		std::vector<double> speed_x;
-		std::vector<double> speed_y;
-		std::vector<double> speed_z;
-		double mass;
-		double radius;
+		std::vector<Vector3> position;
+		std::vector<Vector3> speed;
+		std::vector<Vector3> acceleration;
+		double mass {0};
+		double radius {0};
 		std::string id;
 	};
 
-	/** Setta le condizioni iniziali di un pianeta. fa un push_back su i vector inserendo le condizioni iniziali.
-	*	@param Pianeta, andra a modificari i suoi campi
-	*   @param x posizione x
-	*   @param y posizione y
-	*	@param z posizione z
-	*	@param vx velocita lungo x
-	*	@param vx velocita lungo y
-	* 	@param vx velocita lungo z
-	*	@param m massa pianeta
-	*   @param r raggio pianeta
-	*	@param id id del pianeta
+	/** Set a planet IC
+	*	@param planet, will modified fields
+	*	@param position Vector4 with positions
+	*   @param speed Vector3 with speeds
+	*  	@param mass planet mass
+	*   @param radius radius of the planet
+	*	@param acceleration Vector3 with accelerations optional
 	*/
-	void set_ic(Planet&, double, double, double, double, double, double, double,double, std::string_view);
+	void set_ic(Planet& planet,const Vector3& position,const Vector3& speed, double mass, double radius, const Vector3& acceleration = {0,0,0});
 
-	/** Calcola la componente x della gravita' come accellerazione a = Gm/(sqrt((x1-x2)^2 + (y1-y2)^2))^3 * (x2-x1)
-	* 	@param m
-	*	@param x1
-	*	@param x2
-	*	@param y1
-	*	@param y2
-	*	@param z1
-	*	@param z2
-	*/
-	double gravity_calc_x(const double, const  double, const  double, const  double, const  double, const  double, const  double);
+	/** Set a planet IC
+*	@param planet, will modified fields
+*	@param position Vector4 with positions
+*   @param speed Vector3 with speeds
+*  	@param mass planet mass
+*   @param radius radius of the planet
+*   @param id string with planet name
+*	@param acceleration Vector3 with accelerations optional
+*/
+	void set_ic(Planet& planet,const Vector3& position,const Vector3& speed,double mass, double radius, std::string_view id,const Vector3& acceleration = {0,0,0});
 
-	/** Calcola la componente y della gravita' come accellerazione a = Gm/(sqrt((x1-x2)^2 + (y1-y2)^2))^3 * (y2-y1)
-	* 	@param m
-	*	@param x1
-	*	@param x2
-	*	@param y1
-	*	@param y2
-	*	@param z1
-	*	@param z2
+	/** x componet of gravity acceleration between 2 planets a = m/(sqrt((x1-x2)^2 + (y1-y2)^2))^3 * (x2-x1)
+	 * 	 G is set to 1
+	* 	@param position of the first planet
+	*	@param position of the second planet
+	*	@param mass of the other planet
 	*/
-	double gravity_calc_y(const double, const  double, const  double, const  double, const  double, const  double, const  double);
+	double gravity_calc_x(double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 );
 
-	/** Calcola la componente z della gravita' come accellerazione a = Gm/(sqrt((x1-x2)^2 + (y1-y2)^2))^3 * (z2-z1)
-	*   @param m
-	*	@param x1
-	*	@param x2
-	*	@param y1
-	*	@param y2
-	*	@param z1
-	*	@param z2
+	/** y componet of gravity acceleration between 2 planets a = m/(sqrt((x1-x2)^2 + (y1-y2)^2))^3 * (x2-x1)
+	 * 	G is set to 1
+	* 	@param position of the first planet
+	*	@param position of the second planet
+	*	@param mass of the other planet
 	*/
-	double gravity_calc_z(const double, const  double, const  double, const  double, const  double, const  double, const  double);
+	double gravity_calc_y(double  mass_p2, const Vector3& position_p1,const Vector3& position_p2 );
+
+	/** z componet of gravity acceleration between 2 planets a = m/(sqrt((x1-x2)^2 + (y1-y2)^2))^3 * (x2-x1)
+	 *  G is set to 1
+	* 	@param position of the first planet
+	*	@param position of the second planet
+	*	@param mass of the other planet
+	*/
+	double gravity_calc_z(double  mass_p2, const Vector3& position_p1, const Vector3& position_p2 );
+
+
 }
 
 #endif // !PHY
