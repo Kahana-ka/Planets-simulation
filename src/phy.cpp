@@ -18,6 +18,10 @@ phy::Vector3 phy::Vector3::operator*(const double rh_value) const {
     return {x*rh_value,y*rh_value,z*rh_value};
 }
 
+phy::Vector3 phy::Vector3::operator+=(const Vector3& rv3) const {
+    return {x+rv3.x,y+rv3.y,z+rv3.z};
+}
+
 double phy::Vector3::module() const {
     return std::sqrt(x*x+y*y+z*z);
 }
