@@ -30,8 +30,8 @@ void Solver_base<size>::add_planet(const phy::Planet& p) {
 	planets_solver.back().id = p.id;
 
 	for (int i = 0; i < size; i++) {
-		planets_solver.back().k_position.push_back({0.,0.,0.});
-		planets_solver.back().k_speed.push_back({0.,0.,0.});
+		planets_solver.back().k_position[i] = {0.,0.,0.};
+		planets_solver.back().k_speed[i] = {0.,0.,0.};
 	}
 }
 
@@ -214,9 +214,10 @@ void Solver_base<size>::set_save(const std::string_view output_path, const bool 
 
 template<int size>
 void Solver_base<size>::remove_dead_planets() {
-
-	while (auto it = std::find_if(planets_solver.begin(), planets_solver.end(),[](const Planet_solver<size>& p) {return !p.dead;}) != planets_solver.end()) {
+	auto it = std::find_if(planets_solver.begin(), planets_solver.end(),[](const Planet_solver<size>& p) {return !p.dead;});
+	while (it != planets_solver.end()) {
 		planets_solver.erase(it);
+		it = std::find_if(planets_solver.begin(), planets_solver.end(),[](const Planet_solver<size>& p) {return !p.dead;});
 	}
 }
 

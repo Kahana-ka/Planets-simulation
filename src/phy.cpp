@@ -19,7 +19,7 @@ phy::Vector3 phy::Vector3::operator*(const double rh_value) const {
 }
 
 double phy::Vector3::module() const {
-    return sqrt(x*x+y*y+z*z);
+    return std::sqrt(x*x+y*y+z*z);
 }
 
 double phy::Vector3::dot(const Vector3& v3) const {
@@ -31,7 +31,7 @@ phy::Vector3 phy::Vector3::cross(const Vector3& v3) const {
 }
 
 double phy::Vector3::distance(const Vector3& v3) const {
-    return sqrt(pow(x-v3.x,2)+pow(y-v3.y,2)+pow(z-v3.z,2));
+    return sqrt(std::pow(x-v3.x,2)+std::pow(y-v3.y,2)+std::pow(z-v3.z,2));
 }
 
 void phy::set_ic(Planet& planet,const Vector3& position,const Vector3& speed, const double mass, const double radius, const Vector3& acceleration) {
