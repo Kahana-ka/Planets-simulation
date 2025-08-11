@@ -2,239 +2,159 @@
 #include "solver_runge_kutta_5.h"
 
 
-std::tuple<double, double, double> rk5::gravity_k1(const rk::Planet_solver& self,const std::vector<rk::Planet_solver>& planets_solver, const double h) {
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+phy::Vector3 rk5::gravity_k1(const Planet_solver<6>& self,const std::vector<Planet_solver<6>>& planets_solver, const double h) {
+	phy::Vector3 k{0.,0.,0.};
+
 	//Viene fatta per tutti i pianeti meno se stesso.
 	for (auto& pl : planets_solver) {
-		if (pl.planet.id == self.planet.id || pl.dead)
+		if (pl.id == self.id || pl.dead)
 			continue;
 
-		kx += phy::gravity_calc_x(pl.planet.mass, self.planet.pos_x.back(), pl.planet.pos_x.back(), self.planet.pos_y.back(), pl.planet.pos_y.back(), self.planet.pos_z.back(), pl.planet.pos_z.back());
-		ky += phy::gravity_calc_y(pl.planet.mass, self.planet.pos_x.back(), pl.planet.pos_x.back(), self.planet.pos_y.back(), pl.planet.pos_y.back(), self.planet.pos_z.back(), pl.planet.pos_z.back());
-		kz += phy::gravity_calc_z(pl.planet.mass, self.planet.pos_x.back(), pl.planet.pos_x.back(), self.planet.pos_y.back(), pl.planet.pos_y.back(), self.planet.pos_z.back(), pl.planet.pos_z.back());
+		k += phy::gravity_calc(pl.mass,self.position.back(),pl.position.back());
 	}
 
-	return std::tuple{kx* h, ky* h, kz* h};
+	return k*h;
 }
-
-std::tuple<double, double, double> rk5::position_k1(const rk::Planet_solver& self, const double h) {
-	const double kx = self.planet.speed_x.back();
-	const double ky = self.planet.speed_y.back();
-	const double kz = self.planet.speed_z.back();
-	return std::tuple<double, double, double>{kx* h, ky* h, kz* h};
+phy::Vector3 rk5::position_k1(const Planet_solver<6>& self, const double h) {
+	return self.speed.back()*h;
 }
 
 //K2
 
-std::tuple<double, double, double> rk5::gravity_k2(const rk::Planet_solver& self,const std::vector<rk::Planet_solver>& planets_solver, const double h) {
+phy::Vector3 rk5::gravity_k2(const Planet_solver<6>& self,const std::vector<Planet_solver<6>>& planets_solver, const double h) {
 
-	using std::get;
-
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
 	for (auto& pl : (planets_solver)) {
-		if (pl.planet.id == self.planet.id || pl.dead)
+		if (pl.id == self.id || pl.dead)
 			continue;
 
-		const double x1 = arg_k2(self.planet.pos_x.back(), get<x>(self.k_pos[K1]));
-		const double x2 = arg_k2(pl.planet.pos_x.back(), get<x>(pl.k_pos[K1]));
+		auto p1 = arg_k2(self.position.back(),self.k_position);
+		auto p2 = arg_k2(pl.position.back(),pl.k_position);
 
-		const double y1 = arg_k2(self.planet.pos_y.back(), get<y>(self.k_pos[K1]));
-		const double y2 = arg_k2(pl.planet.pos_y.back(), get<y>(pl.k_pos[K1]));
+		k += phy::gravity_calc(pl.mass,p1,p2);
 
-		const double z1 = arg_k2(self.planet.pos_z.back(), get<z>(self.k_pos[K1]));
-		const double z2 = arg_k2(pl.planet.pos_z.back(), get<z>(pl.k_pos[K1]));
-
-		kx += phy::gravity_calc_x(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		ky += phy::gravity_calc_y(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		kz += phy::gravity_calc_z(pl.planet.mass, x1, x2, y1, y2, z1, z2);
 	}
 
-	return std::tuple<double, double, double>{kx* h, ky* h, kz* h};
+	return k*h;
 }
-
-std::tuple<double, double, double> rk5::position_k2(const rk::Planet_solver& self, const double h) {
-	const double kx = arg_k2(self.planet.speed_x.back(), get<x>(self.k_speed[K1]));
-	const double ky = arg_k2(self.planet.speed_y.back(), get<y>(self.k_speed[K1]));
-	const double kz = arg_k2(self.planet.speed_z.back(), get<z>(self.k_speed[K1]));
-	return std::tuple{kx* h, ky* h, kz* h};
+phy::Vector3 rk5::position_k2(const Planet_solver<6>& self, const double h) {
+	return arg_k2(self.speed.back(),self.k_speed)*h;
 }
-
-double rk5::arg_k2(const double param, const double k1) {
-	return param + k1 / 4.;
+phy::Vector3 rk5::arg_k2(const phy::Vector3 &param, const std::array<phy::Vector3,6> &k) {
+	return param + k[K1] / 4.;
 }
 
 //k3
 
-std::tuple<double, double, double> rk5::gravity_k3(const rk::Planet_solver& self,const std::vector<rk::Planet_solver>& planets_solver, const double h) {
+phy::Vector3 rk5::gravity_k3(const Planet_solver<6>& self,const std::vector<Planet_solver<6>>& planets_solver, const double h) {
 
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
-	for (auto& pl : planets_solver) {
-		if (pl.planet.id == self.planet.id || pl.dead)
+	for (auto& pl : (planets_solver)) {
+		if (pl.id == self.id || pl.dead)
 			continue;
 
-		const double x1 = arg_k3(self.planet.pos_x.back(), get<x>(self.k_pos[K1]), get<x>(self.k_pos[K2]));
-		const double x2 = arg_k3(pl.planet.pos_x.back(), get<x>(pl.k_pos[K1]), get<x>(pl.k_pos[K2]));
+		auto p1 = arg_k3(self.position.back(),self.k_position);
+		auto p2 = arg_k3(pl.position.back(),pl.k_position);
 
-		const double y1 = arg_k3(self.planet.pos_y.back(), get<y>(self.k_pos[K1]), get<y>(self.k_pos[K2]));
-		const double y2 = arg_k3(pl.planet.pos_y.back(), get<y>(pl.k_pos[K1]), get<y>(pl.k_pos[K2]));
+		k += phy::gravity_calc(pl.mass,p1,p2);
 
-		const double z1 = arg_k3(self.planet.pos_z.back(), get<z>(self.k_pos[K1]), get<z>(self.k_pos[K2]));
-		const double z2 = arg_k3(pl.planet.pos_z.back(), get<z>(pl.k_pos[K1]), get<z>(pl.k_pos[K2]));
-
-		kx += phy::gravity_calc_x(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		ky += phy::gravity_calc_y(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		kz += phy::gravity_calc_z(pl.planet.mass, x1, x2, y1, y2, z1, z2);
 	}
 
-	return std::tuple{kx* h, ky* h, kz* h};
+	return k*h;
 }
-
-std::tuple<double, double, double> rk5::position_k3(const rk::Planet_solver& self, const double h) {
-	const double kx = arg_k3(self.planet.speed_x.back(), get<x>(self.k_speed[K1]), get<x>(self.k_speed[K2]));
-	const double ky = arg_k3(self.planet.speed_y.back(), get<y>(self.k_speed[K1]), get<y>(self.k_speed[K2]));
-	const double kz = arg_k3(self.planet.speed_z.back(), get<z>(self.k_speed[K1]), get<z>(self.k_speed[K2]));
-	return std::tuple<double, double, double>{kx* h, ky* h, kz* h};
+phy::Vector3 rk5::position_k3(const Planet_solver<6>& self, const double h) {
+	return arg_k3(self.speed.back(),self.k_speed)*h;
 }
-
-double rk5::arg_k3(const double param, const double k1, const double k2) {
-	return param + 3. * k1 / 32. + 9. / 32. * k2;
+phy::Vector3 rk5::arg_k3(const phy::Vector3 &param, const std::array<phy::Vector3,6> &k) {
+	return param + k[K1] / 32. * 3. +  k[K2] * 9. / 32.;
 }
 
 //k4
 
-std::tuple<double, double, double> rk5::gravity_k4(const rk::Planet_solver& self,const std::vector<rk::Planet_solver>& planets_solver, const double h) {
+phy::Vector3 rk5::gravity_k4(const Planet_solver<6>& self,const std::vector<Planet_solver<6>>& planets_solver, const double h) {
 
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
-	for (auto& pl : planets_solver) {
-		if (pl.planet.id == self.planet.id || pl.dead)
+	for (auto& pl : (planets_solver)) {
+		if (pl.id == self.id || pl.dead)
 			continue;
 
-		const double x1 = arg_k4(self.planet.pos_x.back(), get<x>(self.k_pos[K1]), get<x>(self.k_pos[K2]), get<x>(self.k_pos[K3]));
-		const double x2 = arg_k4(pl.planet.pos_x.back(), get<x>(pl.k_pos[K1]), get<x>(pl.k_pos[K2]), get<x>(pl.k_pos[K3]));
+		auto p1 = arg_k4(self.position.back(),self.k_position);
+		auto p2 = arg_k4(pl.position.back(),pl.k_position);
 
-		const double y1 = arg_k4(self.planet.pos_y.back(), get<y>(self.k_pos[K1]), get<y>(self.k_pos[K2]), get<y>(self.k_pos[K3]));
-		const double y2 = arg_k4(pl.planet.pos_y.back(), get<y>(pl.k_pos[K1]), get<y>(pl.k_pos[K2]), get<y>(pl.k_pos[K3]));
+		k += phy::gravity_calc(pl.mass,p1,p2);
 
-		const double z1 = arg_k4(self.planet.pos_z.back(), get<z>(self.k_pos[K1]), get<z>(self.k_pos[K2]), get<z>(self.k_pos[K3]));
-		const double z2 = arg_k4(pl.planet.pos_z.back(), get<z>(pl.k_pos[K1]), get<z>(pl.k_pos[K2]), get<z>(pl.k_pos[K3]));
-
-		kx += phy::gravity_calc_x(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		ky += phy::gravity_calc_y(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		kz += phy::gravity_calc_z(pl.planet.mass, x1, x2, y1, y2, z1, z2);
 	}
 
-	return std::tuple{kx* h, ky* h, kz* h};
+	return k*h;
 }
-
-std::tuple<double, double, double> rk5::position_k4(const rk::Planet_solver& self, const double h) {
-	const double kx = arg_k4(self.planet.speed_x.back(), get<x>(self.k_speed[K1]), get<x>(self.k_speed[K2]), get<x>(self.k_speed[K3]));
-	const double ky = arg_k4(self.planet.speed_y.back(), get<y>(self.k_speed[K1]), get<y>(self.k_speed[K2]), get<y>(self.k_speed[K3]));
-	const double kz = arg_k4(self.planet.speed_z.back(), get<z>(self.k_speed[K1]), get<z>(self.k_speed[K2]), get<z>(self.k_speed[K3]));
-	return std::tuple{kx* h, ky* h, kz* h};
+phy::Vector3 rk5::position_k4(const Planet_solver<6>& self, const double h) {
+	return arg_k4(self.speed.back(),self.k_speed)*h;
 }
-
-double rk5::arg_k4(const double param, const double k1, const double k2, const double k3) {
-	return param + k1*1932./2197. - k2*7200./2197. + k3*7296./2197.;
+phy::Vector3 rk5::arg_k4(const phy::Vector3 &param, const std::array<phy::Vector3,6> &k) {
+	return param + k[K1]*1932./2197. - k[K2]*7200./2197. + k[K3]*7296./2197.;
 }
 
 //k5
 
-std::tuple<double, double, double> rk5::gravity_k5(const rk::Planet_solver& self,const std::vector<rk::Planet_solver>& planets_solver, const double h) {
+phy::Vector3 rk5::gravity_k5(const Planet_solver<6>& self,const std::vector<Planet_solver<6>>& planets_solver, const double h) {
 
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
-	for (auto& pl : planets_solver) {
-		if (pl.planet.id == self.planet.id || pl.dead)
+	for (auto& pl : (planets_solver)) {
+		if (pl.id == self.id || pl.dead)
 			continue;
 
-		const double x1 = arg_k5(self.planet.pos_x.back(), get<x>(self.k_pos[K1]), get<x>(self.k_pos[K2]), get<x>(self.k_pos[K3]), get<x>(self.k_pos[K4]));
-		const double x2 = arg_k5(pl.planet.pos_x.back(),   get<x>(pl.k_pos[K1]),   get<x>(pl.k_pos[K2]),    get<x>(pl.k_pos[K3]),  get<x>(pl.k_pos[K4]));
+		auto p1 = arg_k5(self.position.back(),self.k_position);
+		auto p2 = arg_k5(pl.position.back(),pl.k_position);
 
-		const double y1 = arg_k5(self.planet.pos_y.back(), get<y>(self.k_pos[K1]), get<y>(self.k_pos[K2]), get<y>(self.k_pos[K3]), get<y>(self.k_pos[K4]));
-		const double y2 = arg_k5(pl.planet.pos_y.back(),   get<y>(pl.k_pos[K1]),   get<y>(pl.k_pos[K2]),   get<y>(pl.k_pos[K3]),   get<y>(pl.k_pos[K4]));
+		k += phy::gravity_calc(pl.mass,p1,p2);
 
-		const double z1 = arg_k5(self.planet.pos_z.back(), get<z>(self.k_pos[K1]), get<z>(self.k_pos[K2]), get<z>(self.k_pos[K3]), get<z>(self.k_pos[K4]));
-		const double z2 = arg_k5(pl.planet.pos_z.back(),   get<z>(pl.k_pos[K1]),   get<z>(pl.k_pos[K2]),   get<z>(pl.k_pos[K3]),   get<z>(pl.k_pos[K4]));
-
-		kx += phy::gravity_calc_x(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		ky += phy::gravity_calc_y(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		kz += phy::gravity_calc_z(pl.planet.mass, x1, x2, y1, y2, z1, z2);
 	}
 
-	return std::tuple{kx* h, ky* h, kz* h};
+	return k*h;
 }
-
-std::tuple<double, double, double> rk5::position_k5(const rk::Planet_solver& self, const double h) {
-	const double kx = arg_k5(self.planet.speed_x.back(), get<x>(self.k_speed[K1]), get<x>(self.k_speed[K2]), get<x>(self.k_speed[K3]), get<x>(self.k_speed[K4]));
-	const double ky = arg_k5(self.planet.speed_y.back(), get<y>(self.k_speed[K1]), get<y>(self.k_speed[K2]), get<y>(self.k_speed[K3]), get<y>(self.k_speed[K4]));
-	const double kz = arg_k5(self.planet.speed_z.back(), get<z>(self.k_speed[K1]), get<z>(self.k_speed[K2]), get<z>(self.k_speed[K3]), get<z>(self.k_speed[K4]));
-	return std::tuple{kx* h, ky* h, kz* h};
+phy::Vector3 rk5::position_k5(const Planet_solver<6>& self, const double h) {
+	return arg_k5(self.speed.back(),self.k_speed)*h;
 }
-
-double rk5::arg_k5(const double param, const double k1, const double k2, const double k3, const double k4) {
-	return param + k1*439./216. - k2*8. + k3*3680./531. - k4*845./4140.;
+phy::Vector3 rk5::arg_k5(const phy::Vector3 &param, const std::array<phy::Vector3,6> &k) {
+	return param + k[K1]*439./216. - k[K2]*8. + k[K3]*3680./531. - k[K4]*845./4140.;
 }
 
 //k6
 
-std::tuple<double, double, double> rk5::gravity_k6(const rk::Planet_solver& self,const std::vector<rk::Planet_solver>& planets_solver, const double h) {
+phy::Vector3 rk5::gravity_k6(const Planet_solver<6>& self,const std::vector<Planet_solver<6>>& planets_solver, const double h) {
 
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
-	for (auto& pl : planets_solver) {
-		if (pl.planet.id == self.planet.id || pl.dead)
+	for (auto& pl : (planets_solver)) {
+		if (pl.id == self.id || pl.dead)
 			continue;
 
-		const double x1 = arg_k6(self.planet.pos_x.back(), get<x>(self.k_pos[K1]), get<x>(self.k_pos[K2]), get<x>(self.k_pos[K3]), get<x>(self.k_pos[K4]), get<x>(self.k_pos[K5]));
-		const double x2 = arg_k6(pl.planet.pos_x.back(), get<x>(pl.k_pos[K1]), get<x>(pl.k_pos[K2]), get<x>(pl.k_pos[K3]), get<x>(pl.k_pos[K4]), get<x>(pl.k_pos[K5]));
+		auto p1 = arg_k6(self.position.back(),self.k_position);
+		auto p2 = arg_k6(pl.position.back(),pl.k_position);
 
-		const double y1 = arg_k6(self.planet.pos_y.back(), get<y>(self.k_pos[K1]), get<y>(self.k_pos[K2]), get<y>(self.k_pos[K3]), get<y>(self.k_pos[K4]), get<y>(self.k_pos[K5]));
-		const double y2 = arg_k6(pl.planet.pos_y.back(), get<y>(pl.k_pos[K1]), get<y>(pl.k_pos[K2]), get<y>(pl.k_pos[K3]), get<y>(pl.k_pos[K4]), get<y>(pl.k_pos[K5]));
+		k += phy::gravity_calc(pl.mass,p1,p2);
 
-		const double z1 = arg_k6(self.planet.pos_z.back(), get<z>(self.k_pos[K1]), get<z>(self.k_pos[K2]), get<z>(self.k_pos[K3]), get<z>(self.k_pos[K4]), get<z>(self.k_pos[K5]));
-		const double z2 = arg_k6(pl.planet.pos_z.back(), get<z>(pl.k_pos[K1]), get<z>(pl.k_pos[K2]), get<z>(pl.k_pos[K3]), get<z>(pl.k_pos[K4]), get<z>(pl.k_pos[K5]));
-
-		kx += phy::gravity_calc_x(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		ky += phy::gravity_calc_y(pl.planet.mass, x1, x2, y1, y2, z1, z2);
-		kz += phy::gravity_calc_z(pl.planet.mass, x1, x2, y1, y2, z1, z2);
 	}
 
-	return std::tuple{kx* h, ky* h, kz* h};
+	return k*h;
 }
-
-std::tuple<double, double, double> rk5::position_k6(const rk::Planet_solver& self, const double h) {
-	const double kx = arg_k6(self.planet.speed_x.back(), get<x>(self.k_speed[K1]), get<x>(self.k_speed[K2]), get<x>(self.k_speed[K3]), get<x>(self.k_speed[K4]), get<x>(self.k_speed[K5]));
-	const double ky = arg_k6(self.planet.speed_y.back(), get<y>(self.k_speed[K1]), get<y>(self.k_speed[K2]), get<y>(self.k_speed[K3]), get<y>(self.k_speed[K4]), get<y>(self.k_speed[K5]));
-	const double kz = arg_k6(self.planet.speed_z.back(), get<z>(self.k_speed[K1]), get<z>(self.k_speed[K2]), get<z>(self.k_speed[K3]), get<z>(self.k_speed[K4]), get<z>(self.k_speed[K5]));
-	return std::tuple{kx* h, ky* h, kz* h};
+phy::Vector3 rk5::position_k6(const Planet_solver<6>& self, const double h) {
+	return arg_k6(self.speed.back(),self.k_speed)*h;
 }
-
-double rk5::arg_k6(const double param, const double k1, const double k2, const double k3, const double k4, const double k5) {
-	return param - k1 * 8. / 27. + k2 * 2. - k3 * 3544. / 2565. + k4 * 1859. / 4104. - k5*11./40.;
+phy::Vector3 rk5::arg_k6(const phy::Vector3 &param, const std::array<phy::Vector3,6> &k) {
+	return param - k[K1] * 8. / 27. + k[K2] * 2. - k[K3] * 3544. / 2565. + k[K4] * 1859. / 4104. - k[K5]*11./40.;
 }
 
 
 
-double rk5::next_point(const double w, const double k1, const double k2, const double k3, const double k4,const double k5, const double k6) {
-	return w + 16./135.*k1 + 0.*k2 + 6656./12825.*k3 + 28561./56430.*k4 - 9./50.*k5 +2./55.*k6;
+phy::Vector3 rk5::next_point(const phy::Vector3 &w, const std::array<phy::Vector3,6> &k) {
+	return w + k[K1]*16./135. + k[K2]*0. + k[K3]*6656./12825. + k[K4]*28561./56430. - k[K5]*9./50. + k[K6]*2./55.;
 }
-
-void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
+void rk5::next_step(std::vector<Planet_solver<6>>& ps,const double h) {
 
 	//Calc k1
 	for (auto& pl : ps) {
@@ -243,7 +163,7 @@ void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
 			continue;
 
 		pl.k_speed[K1] = gravity_k1(pl,ps,h);
-		pl.k_pos[K1] = position_k1(pl,h);
+		pl.k_position[K1] = position_k1(pl,h);
 	}
 
 	//Calc k2
@@ -253,7 +173,7 @@ void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
 			continue;
 
 		pl.k_speed[K2] = gravity_k2(pl,ps,h);
-		pl.k_speed[K2] = position_k2(pl,h);
+		pl.k_position[K2] = position_k2(pl,h);
 	}
 
 	//Calc k3
@@ -263,7 +183,7 @@ void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
 			continue;
 
 		pl.k_speed[K3] = gravity_k3(pl,ps,h);
-		pl.k_speed[K3] = position_k3(pl,h);
+		pl.k_position[K3] = position_k3(pl,h);
 	}
 
 	for (auto& pl : ps) {
@@ -272,7 +192,7 @@ void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
 			continue;
 
 		pl.k_speed[K4] = gravity_k4(pl,ps,h);
-		pl.k_speed[K4] = position_k4(pl,h);
+		pl.k_position[K4] = position_k4(pl,h);
 	}
 
 	for (auto& pl : ps) {
@@ -281,7 +201,7 @@ void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
 			continue;
 
 		pl.k_speed[K5] = gravity_k5(pl,ps,h);
-		pl.k_speed[K5] = position_k5(pl,h);
+		pl.k_position[K5] = position_k5(pl,h);
 	}
 
 	for (auto& pl : ps) {
@@ -290,21 +210,16 @@ void rk5::next_step(std::vector<rk::Planet_solver>& ps,const double h) {
 			continue;
 
 		pl.k_speed[K6] = gravity_k6(pl,ps,h);
-		pl.k_speed[K6] = position_k6(pl,h);
+		pl.k_position[K6] = position_k6(pl,h);
 	}
 
 	//calc the values
-	for (auto&[planet, dead, k_pos, k_speed] : ps) {
-		if (dead)
+	for (auto& pl : ps) {
+		if (pl.dead)
 			continue;
 
-		planet.pos_x.push_back(next_point(planet.pos_x.back(), get<x>(k_pos[K1]), get<x>(k_pos[K2]), get<x>(k_pos[K3]), get<x>(k_pos[K4]), get<x>(k_pos[K5]), get<x>(k_pos[K6])));
-		planet.pos_y.push_back(next_point(planet.pos_y.back(), get<y>(k_pos[K1]), get<y>(k_pos[K2]), get<y>(k_pos[K3]), get<y>(k_pos[K4]), get<y>(k_pos[K5]), get<y>(k_pos[K6])));
-		planet.pos_z.push_back(next_point(planet.pos_z.back(), get<z>(k_pos[K1]), get<z>(k_pos[K2]), get<z>(k_pos[K3]), get<z>(k_pos[K4]), get<z>(k_pos[K5]), get<z>(k_pos[K6])));
-
-		planet.speed_x.push_back(next_point(planet.speed_x.back(), get<x>(k_speed[K1]), get<x>(k_speed[K2]), get<x>(k_pos[K3]), get<x>(k_pos[K4]), get<x>(k_pos[K5]), get<x>(k_pos[K6])));
-		planet.speed_y.push_back(next_point(planet.speed_y.back(), get<y>(k_speed[K1]), get<y>(k_speed[K2]), get<y>(k_pos[K3]), get<y>(k_pos[K4]), get<y>(k_pos[K5]), get<y>(k_pos[K6])));
-		planet.speed_z.push_back(next_point(planet.speed_z.back(), get<z>(k_speed[K1]), get<z>(k_speed[K2]), get<z>(k_pos[K3]), get<z>(k_pos[K4]), get<z>(k_pos[K5]), get<z>(k_pos[K6])));
+		pl.position.push_back(next_point(pl.position.back(),pl.k_position) );
+		pl.speed.push_back(next_point(pl.speed.back(),pl.k_speed) );
 	}
 
 }
@@ -315,56 +230,6 @@ void rk5::RK5_solver::next_step() {
 	rk5::next_step(planets_solver,h);
 }
 
-void rk5::RK5_solver::runge_kutta_solver() {
-
-	time.push_back(start_time);
-
-	create_files();
-
-	for (int i = 0; i * h + start_time < end_time; ++i) {
-
-		++step_counter;
-
-		time.push_back(i * h + start_time);
-		next_step();
-
-		handle_collision(n_param, data_keep);
-
-		if (step_counter >= step_to_save) {
-			save_data(data_keep);
-		}
-
-	}
-
-	save_data(0);
-
-}
-
-
-// ~~~~~~~~~~~~~~~~ Costruttori ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-rk5::RK5_solver::RK5_solver(const std::vector<phy::Planet>& planets, const double start_time, const double end_time, const double step, const double collision_tollerrance) :
-	RK5_solver(planets, start_time, end_time, step, collision_tollerrance, "", true, 100) {
-}
-
-rk5::RK5_solver::RK5_solver(const std::vector<phy::Planet>& planets, const double start_time, const double end_time, const double step, const double collision_tollerrance,
-	std::string_view out_path, const bool save_all, const int step_to_next_save) {
-
-	for (auto& pl : planets) {
-		init_planets_solver(pl, n_param);
-	}
-
-	// Parametri simulazione
-	this->h = step;
-	this->start_time = start_time;
-	this->end_time = end_time;
-	this->collision_tollerrance = collision_tollerrance;
-
-
-	// Parametri salvataggio dati
-	set_save(out_path, save_all, step_to_next_save);
-
-}
 
 rk5::RK5_solver::~RK5_solver() {
 	planets_solver.clear();
