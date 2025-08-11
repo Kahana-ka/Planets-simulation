@@ -25,8 +25,8 @@ add_library(rk_solvers
             src/solver_runge_kutta_4.cpp
             include/solver_runge_kutta_5.h
             src/solver_runge_kutta_5.cpp
-            include/solver_runge_kutta_adaptive.h
-            src/solver_runge_kutta_adaptive.cpp
+ #           include/solver_runge_kutta_adaptive.h
+ #           src/solver_runge_kutta_adaptive.cpp
             )
 
 add_library(phy include/phy.h src/phy.cpp)

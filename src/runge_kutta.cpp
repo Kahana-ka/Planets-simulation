@@ -3,10 +3,6 @@
 
 #include <algorithm>
 
-#include "solver_runge_kutta_3.h"
-#include "solver_runge_kutta_4.h"
-#include "solver_runge_kutta_adaptive.h"
-
 // Init planet solver
 
 template<int size>
