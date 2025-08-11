@@ -58,3 +58,9 @@ double phy::gravity_calc_y(const double  mass_p2,const Vector3& position_p1, con
 double phy::gravity_calc_z(const double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 ) {
     return mass_p2/pow( position_p1.distance(position_p2) ,3) * (position_p2.z - position_p1.z);
 }
+
+phy::Vector3 phy::gravity_calc (const double  mass_p2, const Vector3 &planet_1, const Vector3 &planet_2) {
+    return {gravity_calc_x(mass_p2,planet_1,planet_2),
+            gravity_calc_y(mass_p2,planet_1,planet_2),
+            gravity_calc_z(mass_p2,planet_1,planet_2)};
+}
