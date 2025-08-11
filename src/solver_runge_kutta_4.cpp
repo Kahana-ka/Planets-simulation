@@ -51,7 +51,7 @@ phy::Vector3 rk4::position_k2(const Planet_solver<4>& self, const double h) {
 
 
 
-phy::Vector3 arg_k2(const phy::Vector3& param , const phy::Vector3& k1) {
+phy::Vector3  rk4::arg_k2(const phy::Vector3& param , const phy::Vector3& k1) {
 	return param + k1 / 2.;
 }
 
@@ -79,7 +79,7 @@ phy::Vector3 rk4::position_k3(const Planet_solver<4>& self, const double h) {
 }
 
 
-phy::Vector3 arg_k3(const phy::Vector3& param , const phy::Vector3& k2) {
+phy::Vector3  rk4::arg_k3(const phy::Vector3& param , const phy::Vector3& k2) {
 	return param + k2 /2.;
 }
 
@@ -107,7 +107,7 @@ phy::Vector3 rk4::position_k4(const Planet_solver<4>& self, const double h) {
 }
 
 
-phy::Vector3 arg_k4(const phy::Vector3& param , const phy::Vector3& k3) {
+phy::Vector3 rk4::arg_k4(const phy::Vector3& param , const phy::Vector3& k3) {
 	return param + k3;
 }
 

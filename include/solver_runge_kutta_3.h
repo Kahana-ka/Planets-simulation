@@ -42,9 +42,6 @@ namespace rk3 {
 
 		void next_step() override;
 
-		//Quanti dati tenere a ogni salvataggio
-		static constexpr int data_keep = 1;
-
 	public:
 		//Costruttore 
 		RK3_solver(const std::vector<phy::Planet>& planets,double step,double start_time,double end_time,double collision_tolerance)

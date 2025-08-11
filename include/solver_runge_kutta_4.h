@@ -45,7 +45,7 @@ namespace rk4 {
 
 	class RK4_solver : public Solver_base<4> {
 	private:
-		static constexpr int data_keep = 1;
+
 		void next_step() override;
 
 	public:

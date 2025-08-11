@@ -55,7 +55,7 @@ namespace rk5 {
 	class RK5_solver : public Solver_base<6> {
 	private:
 		void next_step() override;
-		static constexpr int data_keep = 1;
+
 
 	public:
 		//Costruttore 
