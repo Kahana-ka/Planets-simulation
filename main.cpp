@@ -17,7 +17,8 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-
+void solver_test();
+void plot(std::string_view path,std::string_view plt_name);
 
 constexpr std::string_view save_path3 = "Out/p3/";
 constexpr std::string_view save_path4 = "Out/p4/";
@@ -36,10 +37,53 @@ std::vector<Data_info::Data_label> coll_labels{
 };
 
 int main() {
-	Data_info d1 {"Pt_1 tra","Out/p4/Pianeta_1"};
-	Data_info d2 {"Pt_2 tra","Out/p4/Pianeta_2"};
-	Data_info d3 {"Pt_3 tra","Out/p4/Pianeta_3"};
 
+	solver_test();
+	plot(save_path3,"trajectory_3");
+	plot(save_path4,"trajectory_4");
+	plot(save_path5,"trajectory_5");
+	return 0;
+}
+
+
+
+void solver_test() {
+
+	using namespace std::literals;
+	phy::Planet p1{};
+	phy::Planet p2{};
+	phy::Planet p3{};
+
+	phy::set_ic(p1,{0.,0.,0.},{0.,0.,0.},1000,0.1, "Pianeta_1"sv);
+	phy::set_ic(p2, {10.,0.,0.},{0.,10.,0.},10,0.1, "Pianeta_2"sv);
+	phy::set_ic(p3,{-5.,0.,0.},{0.,10.,0.},10,0.1, "Pianeta_3"sv);
+
+	vector<phy::Planet> planets{p1,p2,p3};
+
+	double h = 0.0001;
+	double start = 0;
+	double end = 100;
+
+	rk3::RK3_solver rk3_s(planets, start, end, h, 0.01);
+	rk4::RK4_solver rk4_s(planets, start, end, h, 0.01);
+	rk5::RK5_solver rk5_s(planets, start, end, h, 0.01);
+
+
+	rk3_s.set_save(save_path3,false,100);
+	rk4_s.set_save(save_path4, false, 100);
+	rk5_s.set_save(save_path5, false, 100);
+
+
+	rk3_s.solve();
+	rk4_s.solve();
+	rk5_s.solve();
+}
+
+
+void plot(std::string_view path,std::string_view plt_name) {
+	Data_info d1 {"Pt_1 tra",std::string(path) + "Pianeta_1"};
+	Data_info d2 {"Pt_2 tra",std::string(path) + "Pianeta_2"};
+	Data_info d3 {"Pt_3 tra",std::string(path) + "Pianeta_3"};
 
 	//Settaggio
 	d1.set_line_style({Line_attribute::none,"",3});
@@ -58,44 +102,5 @@ int main() {
 
 	Gnu_plotter::Axis_limits a{-12,12,-12,12,0,110};
 
-	gp.curve_plot(2,3,a,"trajector");
-	gp.multi_curve_plot({{1,2,1},{1,3,1},{1,4,1}},{1,3},"3d");
-	gp.animate_curve_plot(2,3,a,"traj_ani",200,15,60);
-
-	return 0;
+	gp.curve_plot(2,3,a,plt_name);
 }
-
-
-
-// void solver_test() {
-//
-// 	using namespace std::literals;
-// 	phy::Planet p1{};
-// 	phy::Planet p2{};
-// 	phy::Planet p3{};
-//
-// 	phy::set_ic(p1, 0., 0., 0., 0., 0, 0, 1000, 0.1, "Pianeta_1"sv);
-// 	phy::set_ic(p2, 10., 0.,0.,0., 10.,0., 10., 0.1 , "Pianeta_2"sv);
-// 	phy::set_ic(p3, -5, 0., 0.,0.,10, 0., 10, 0.1, "Pianeta_3"sv);
-//
-// 	vector<phy::Planet> planets{p1,p2,p3};
-//
-// 	double h = 0.0001;
-// 	double start = 0;
-// 	double end = 100;
-//
-// 	rk3::RK3_solver rk3_s(planets, start, end, h, 0.01);
-// 	rk4::RK4_solver rk4_s(planets, start, end, h, 0.01);
-// 	rk5::RK5_solver rk5_s(planets, start, end, h, 0.01);
-// 	rk_add::RK_adaptive rkadd_s(planets, start, end, h,h/100,0.001, 0.01);
-//
-// 	rk3_s.set_save(save_path3,false,100);
-// 	rk4_s.set_save(save_path4, false, 100);
-// 	rk5_s.set_save(save_path5, false, 100);
-// 	rkadd_s.set_save(save_pathadd, false, 500);
-//
-// 	rk3_s.runge_kutta_solver();
-// 	rk4_s.runge_kutta_solver();
-// 	rk5_s.runge_kutta_solver();
-// 	rkadd_s.runge_kutta_solver();
-// }
