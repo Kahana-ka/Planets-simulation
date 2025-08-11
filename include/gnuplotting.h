@@ -25,28 +25,17 @@ namespace Point_attribute {
 }
 
 
-
-struct Timeline {
-    std::vector<int> row_start;
-    std::vector<int> row_end;
-    std::vector<std::string_view> files;
-};
-
-std::vector<Timeline> make_timeline(std::vector<std::string_view> files);
-
-std::string last_line(std::string file);
-
 class Data_info {
 
 public:
     struct Data_label {
-        std::string_view name;
-        std::string_view units;
+        std::string name;
+        std::string units;
     };
 
     struct Line_style {
         Line_attribute::Line_attribute style{Line_attribute::none};
-        std::string_view color; /// in hex
+        std::string color; /// in hex
         int size {-1};
     };
 
@@ -56,8 +45,8 @@ public:
     };
 
 private:
-    std::string_view name;
-    std::string_view path;
+    std::string name;
+    std::string path;
 
     Line_style line_style {};
     Point_style point_style {};
@@ -71,8 +60,8 @@ public:
 
     //Add
     void add_column_name(std::string_view name,std::string_view units);
-    void add_column_name(const std::vector<std::pair<std::string_view,std::string_view>>& names);
-    void add_column_name(const std::vector<Data_label>& names);
+    void add_column_name(std::vector<std::pair<std::string,std::string>> names);
+    void add_column_name(std::vector<Data_label> names);
 
     void set_line_style(Line_attribute::Line_attribute style, std::string_view color, int size);
     void set_line_style(const Line_style &style);
@@ -80,8 +69,8 @@ public:
     void set_point_style(Point_attribute::Point_attribute style, int size);
     void set_point_style(Point_style style);
 
-    const std::string_view & get_name() const;
-    const std::string_view & get_path() const;
+    const std::string & get_name() const;
+    const std::string & get_path() const;
     const Line_style & get_line_style() const;
     const Point_style & get_point_style() const;
 
@@ -96,12 +85,12 @@ public:
 
 class Gnu_plotter {
 
-    static constexpr std::string_view gnu_new_line = ",\\\n";
+    static constexpr std::string gnu_new_line = ",\\\n";
 
 public:
     struct Canvas_info {
         // Da popolare
-        std::string_view legend_position;
+        std::string legend_position;
     };
 
     struct Axis_limits {
@@ -117,7 +106,7 @@ private:
     // Dati dentro il vettore sono assunti dello stesso tipo
     // Quindi stessi nomi alle colonne etc....
     std::vector<Data_info>  data;
-    std::string_view save_path;
+    std::string save_path;
     Canvas_info canvas_info;
 
     //Flag interni
@@ -146,10 +135,10 @@ private:
 
 
 public:
-    std::string join_files_position();
+    std::string join_files_position(int coll_x, int coll_y, int coll_z);
     explicit Gnu_plotter(const std::vector<Data_info>& data);
 
-    Gnu_plotter(const std::vector<Data_info>& data,std::string_view save_path,const std::pair<int,int>& resolution);
+    Gnu_plotter(const std::vector<Data_info>& data, std::string_view save_path,const std::pair<int,int>& resolution);
 
 
     std::string curve_plot(int x_column,int y_column,const Axis_limits& a_limit,std::string_view plot_name="");
@@ -162,11 +151,11 @@ public:
     std::string multi_curve_plot(const std::vector<std::tuple<int,int>>& columns,const std::pair<int,int>& layout,const std::vector<Axis_limits>& a_limit,std::string_view plot_name="");
     std::string multi_curve_plot(const std::vector<std::tuple<int,int,int>>& columns,const std::pair<int,int>& layout,const std::vector<Axis_limits>& a_limit,std::string_view plot_name="");
 
-    std::string animate_curve_plot_trajectory_3d(std::string_view plot_name,int tail,int frequency,int fps);
-    std::string animate_curve_plot_trajectory_3d(const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot(int x_coll,int y_coll,int z_coll,std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot(int x_coll,int y_coll,int z_coll,const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
 
-    std::string animate_curve_plot_trajectory_2d(std::string_view plot_name,int tail,int frequency,int fps);
-    std::string animate_curve_plot_trajectory_2d(const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot(int x_coll,int y_coll,std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot(int x_coll,int y_coll,const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
 
 
 };

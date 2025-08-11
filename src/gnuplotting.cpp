@@ -112,7 +112,7 @@ Gnu_plotter::Gnu_plotter(const std::vector<Data_info>& data) : Gnu_plotter(data,
 
 Gnu_plotter::Gnu_plotter(const std::vector<Data_info>& data, const std::string_view save_path,const std::pair<int,int>& resolution) {
     this->data = data;
-    this->save_path = save_path;
+    this->save_path = std::string(save_path);
     this->resolution = resolution;
 }
 
@@ -289,12 +289,12 @@ std::string Gnu_plotter::multi_curve_plot(const std::vector<std::tuple<int,int,i
 }
 
 
-std::string Gnu_plotter::animate_curve_plot_trajectory_3d(const std::string_view plot_name,int tail,int frequency,int fps) {
+std::string Gnu_plotter::animate_curve_plot(int x_coll,int y_coll,int z_coll,const std::string_view plot_name,int tail,int frequency,int fps) {
     constexpr Axis_limits a{};
-    return animate_curve_plot_trajectory_3d(a,plot_name,tail,frequency,fps);
+    return animate_curve_plot(x_coll,y_coll,z_coll,a,plot_name,tail,frequency,fps);
 }
 
-std::string Gnu_plotter::animate_curve_plot_trajectory_3d(const Axis_limits& a_limit, const std::string_view plot_name,int tail,int frequency,int fps) {
+std::string Gnu_plotter::animate_curve_plot(int x_coll,int y_coll,int z_coll,const Axis_limits& a_limit, const std::string_view plot_name,int tail,int frequency,int fps) {
 
     // e forzato a salvare quindi se non ha i dati esce
     if (save_path.empty() || plot_name.empty()) {
@@ -305,9 +305,12 @@ std::string Gnu_plotter::animate_curve_plot_trajectory_3d(const Axis_limits& a_l
 
     std::string data_file = "";
     if (data.size() > 1)
-        data_file = join_files_position();
-    else
-        data_file = data[0].get_path();
+        data_file = join_files_position(x_coll,y_coll,z_coll);
+    else {
+        std::string cut = std::format("cut -d ' ' -f 1,{},{},{} {} > {}{}",x_coll,y_coll,z_coll,data[0].get_path(),save_path,plot_name);
+        system(cut.c_str());
+        data_file = std::format("{}{}",save_path,plot_name);
+    }
 
     const int lines_number = sys_utils::count_files_lines(data_file);
 
@@ -345,20 +348,20 @@ std::string Gnu_plotter::animate_curve_plot_trajectory_3d(const Axis_limits& a_l
     command += "\n}";
 
     //DEbug
-    std::cout << command << std::endl;
+
     gnu_plot_command_w_sync(command);
-    std::cout << "Fino gnuare" << std::endl;
+    std::cout << "ani_plot" << std::endl << command << std::endl;
     sys_utils::make_vieo(save_path,plot_name,fps);
     sys_utils::delete_files(std::format("{}*_{}.png",save_path,plot_name));
     return command;
 }
 
-std::string Gnu_plotter::animate_curve_plot_trajectory_2d(const std::string_view plot_name, const int tail, const int frequency, const int fps) {
+std::string Gnu_plotter::animate_curve_plot(int x_coll,int y_coll, const std::string_view plot_name, const int tail, const int frequency, const int fps) {
     constexpr Axis_limits a{};
-    return animate_curve_plot_trajectory_2d(a,plot_name,tail,frequency,fps);
+    return animate_curve_plot(x_coll,y_coll,a,plot_name,tail,frequency,fps);
 }
 
-std::string Gnu_plotter::animate_curve_plot_trajectory_2d(const Axis_limits& a_limit, const std::string_view plot_name,int tail,int frequency,int fps) {
+std::string Gnu_plotter::animate_curve_plot(int x_coll,int y_coll, const Axis_limits& a_limit, const std::string_view plot_name,int tail,int frequency,int fps) {
 
     // e forzato a salvare quindi se non ha i dati esce
     if (save_path.empty() || plot_name.empty()) {
@@ -366,11 +369,14 @@ std::string Gnu_plotter::animate_curve_plot_trajectory_2d(const Axis_limits& a_l
     }
 
     std::string command;
-    std::string data_file = "";
+    std::string data_file;
     if (data.size() > 1)
-        data_file = join_files_position();
-    else
-        data_file = data[0].get_path();
+        data_file = join_files_position(x_coll,y_coll,2);
+    else {
+        std::string cut = std::format("cut -d ' ' -f 1,{},{},2 {} > {}{}",x_coll,y_coll,data[0].get_path(),save_path,plot_name);
+        system(cut.c_str());
+        data_file = std::format("{}{}",save_path,plot_name);
+    }
 
     const int lines_number = static_cast<int>( sys_utils::count_files_lines(data_file));
 
@@ -409,9 +415,8 @@ std::string Gnu_plotter::animate_curve_plot_trajectory_2d(const Axis_limits& a_l
     command += "\n}";
 
     //DEbug
-    std::cout << command << std::endl;
     gnu_plot_command_w_sync(command);
-    std::cout << "Fino gnuare" << std::endl;
+
     sys_utils::make_vieo(save_path,plot_name,fps);
     sys_utils::delete_files(std::format("{}*_{}.png",save_path,plot_name));
     return command;
@@ -421,7 +426,7 @@ std::string Gnu_plotter::animate_curve_plot_trajectory_2d(const Axis_limits& a_l
 
 // Estremo schifo ma funge
 
-std::string Gnu_plotter::join_files_position() {
+std::string Gnu_plotter::join_files_position(int coll_x, int coll_y, int coll_z) {
 
     int temp_id = 1;
 
@@ -430,7 +435,7 @@ std::string Gnu_plotter::join_files_position() {
     }
 
     //jino i primi due file
-    std::string join = std::format("join -a1 -a2 -e NaN -o 0 1.2 1.3 1.4 2.2 2.3 2.4 {} {} > {}temp0",data[0].get_path(),data[1].get_path(),save_path);
+    std::string join = std::format("join -a1 -a2 -e NaN -o 0 1.{} 1.{} 1.{} 2.{} 2.{} 2.{} {} {} > {}temp0",coll_x,coll_y,coll_z,coll_x,coll_y,coll_z,data[0].get_path(),data[1].get_path(),save_path);
 
     system(join.c_str());
 
@@ -442,7 +447,7 @@ std::string Gnu_plotter::join_files_position() {
         std::string o{"-o 0 "};
         for (int j = 0; j<i*3; j++)
             o += std::format("1.{} ",2+j);
-        o += "2.2 2.3 2.4 ";
+        o += std::format("2.{} 2.{} 2.{} ",coll_x,coll_y,coll_z);
         join = std::format("join -a1 -a2 -e NaN {} {}temp{} {} > {}temp{}",o,save_path,temp_id-1,data[i].get_path(),save_path,temp_id);
         system(join.c_str());
         temp_id++;
@@ -469,21 +474,21 @@ std::string Gnu_plotter::join_files_position() {
 
 
 Data_info::Data_info(const std::string_view name, const std::string_view path) {
-    this->path = path;
-    this->name = name;
+    this->path = std::string(path);
+    this->name = std::string(name);
 }
 
 //Add
 void Data_info::add_column_name(const std::string_view name, const std::string_view units) {
-    columns_name.push_back({name,units});
+    columns_name.push_back({std::string(name),std::string(units)});
 }
 
-void Data_info::add_column_name(const std::vector<std::pair<std::string_view,std::string_view>>& names) {
+void Data_info::add_column_name(std::vector<std::pair<std::string,std::string>> names) {
     for (auto& [fst, snd] : names)
         columns_name.push_back({fst,snd});
 }
 
-void Data_info:: add_column_name(const std::vector<Data_label>& names) {
+void Data_info:: add_column_name(std::vector<Data_label> names) {
     columns_name = names;
 }
 
@@ -506,11 +511,11 @@ void Data_info::set_point_style(const Point_style style) {
     point_style = style;
 }
 
-const std::string_view & Data_info::get_name() const {
+const std::string & Data_info::get_name() const {
     return name;
 }
 
-const std::string_view & Data_info::get_path() const {
+const std::string & Data_info::get_path() const {
     return path;
 }
 
