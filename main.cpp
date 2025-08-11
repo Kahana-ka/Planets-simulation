@@ -64,14 +64,14 @@ void solver_test() {
 	double start = 0;
 	double end = 100;
 
-	rk3::RK3_solver rk3_s(planets, start, end, h, 0.01);
-	rk4::RK4_solver rk4_s(planets, start, end, h, 0.01);
-	rk5::RK5_solver rk5_s(planets, start, end, h, 0.01);
+	rk3::RK3_solver rk3_s(planets, h, start, end, 0.01);
+	rk4::RK4_solver rk4_s(planets, h, start, end, 0.01);
+	rk5::RK5_solver rk5_s(planets, h, start, end, 0.01);
 
 
-	rk3_s.set_save(save_path3,false,100);
-	rk4_s.set_save(save_path4, false, 100);
-	rk5_s.set_save(save_path5, false, 100);
+	rk3_s.set_save(save_path3,false,h*10);
+	rk4_s.set_save(save_path4, false, h*10);
+	rk5_s.set_save(save_path5, false, h*10);
 
 
 	rk3_s.solve();
