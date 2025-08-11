@@ -2,27 +2,59 @@
 #include "phy.h"
 
 
-void phy::set_ic(phy::Planet& p, double x, double y, double z, double vx, double vy,double vz, double m,double r, std::string_view id) {
-	p.pos_x.push_back(x);
-	p.pos_y.push_back(y);
-	p.pos_z.push_back(z);
-	p.speed_x.push_back(vx);
-	p.speed_y.push_back(vy);
-	p.speed_z.push_back(vz);
-	p.mass = m;
-	p.radius = r;
-	p.id = id;
+phy::Vector3 phy::Vector3::operator+(const Vector3& rv3) const {
+    return {x+rv3.x,y+rv3.y,z+rv3.z};
 }
 
-
-double phy::gravity_calc_x(const double m,const double x1,const double x2,const double y1,const double y2, const  double z1, const  double z2) {
-	return G * (m) / pow(pow(x1 - x2, 2.) + pow(y1 - y2, 2.) + pow(z1 - z2, 2.), 3./2.) * (x2 - x1);
+phy::Vector3 phy::Vector3::operator-(const Vector3& rv3) const {
+    return {x-rv3.x,y-rv3.y,z-rv3.z};
 }
 
-double phy::gravity_calc_y(const double m, const  double x1, const  double x2, const  double y1, const  double y2, const  double z1, const  double z2) {
-	return G * (m) / pow(pow(x1 - x2, 2.) + pow(y1 - y2, 2.) + pow(z1 - z2, 2.), 3. / 2.) * (y2 - y1);
+phy::Vector3 phy::Vector3::operator/(const double rh_value) const {
+    return {x/rh_value,y/rh_value,z/rh_value};
 }
 
-double phy::gravity_calc_z(const double m, const  double x1, const  double x2, const  double y1, const  double y2, const  double z1, const  double z2) {
-	return G * (m) / pow(pow(x1 - x2, 2.) + pow(y1 - y2, 2.) + pow(z1 - z2, 2.), 3. / 2.) * (z2 - z1);
+phy::Vector3 phy::Vector3::operator*(const double rh_value) const {
+    return {x*rh_value,y*rh_value,z*rh_value};
+}
+
+double phy::Vector3::module() const {
+    return std::sqrt(x*x+y*y+z*z);
+}
+
+double phy::Vector3::dot(const Vector3& v3) const {
+    return x*v3.x + y*v3.y + z*v3.z;
+}
+
+phy::Vector3 phy::Vector3::cross(const Vector3& v3) const {
+    return {y*v3.z-z*v3.y,z*v3.x-x*v3.z,x*v3.y-y*v3.x};
+}
+
+double phy::Vector3::distance(const Vector3& v3) const {
+    return sqrt(std::pow(x-v3.x,2)+std::pow(y-v3.y,2)+std::pow(z-v3.z,2));
+}
+
+void phy::set_ic(Planet& planet,const Vector3& position,const Vector3& speed, const double mass, const double radius, const Vector3& acceleration) {
+    set_ic(planet,position,speed,mass,radius,"",acceleration);
+}
+
+void phy::set_ic(Planet& planet,const Vector3& position,const Vector3& speed, const double mass, const double radius,const std::string_view id,const Vector3& acceleration) {
+    planet.position.push_back(position);
+    planet.speed.push_back(speed);
+    planet.mass = mass;
+    planet.radius = radius;
+    planet.id = id;
+    planet.acceleration.push_back(acceleration);
+}
+
+double phy::gravity_calc_x(const double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 ) {
+    return mass_p2/pow( position_p1.distance(position_p2) ,3) * (position_p2.x - position_p1.x);
+}
+
+double phy::gravity_calc_y(const double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 ) {
+    return mass_p2/pow( position_p1.distance(position_p2) ,3) * (position_p2.y - position_p1.y);
+}
+
+double phy::gravity_calc_z(const double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 ) {
+    return mass_p2/pow( position_p1.distance(position_p2) ,3) * (position_p2.z - position_p1.z);
 }
