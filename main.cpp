@@ -43,11 +43,11 @@ int main() {
 
 	solver_test();
 	plot_tra(save_path3,"trajectory_3");
-	plot_tra(save_path4,"trajectory_4");
-	plot_tra(save_path5,"trajectory_5");
-	plot_speed_3();
-	plot_speed_2();
-	plot_speed_1();
+//	plot_tra(save_path4,"trajectory_4");
+//	plot_tra(save_path5,"trajectory_5");
+//	plot_speed_3();
+//	plot_speed_2();
+//	plot_speed_1();
 	return 0;
 }
 
@@ -60,24 +60,24 @@ void solver_test() {
 	phy::Planet p2{};
 	phy::Planet p3{};
 
-	phy::set_ic(p1,{0.,0.,0.},{0.,0.,0.},1000,0.1, "Pianeta_1"sv);
-	phy::set_ic(p2, {10.,0.,0.},{0.,10.,0.},10,0.1, "Pianeta_2"sv);
+	phy::set_ic(p1,{1.,0.,0.},{1.,1.,0.},1000,0.1, "Pianeta_1"sv);
+	phy::set_ic(p2, {10.,0.,0.},{-1.,1.,0.},10,0.1, "Pianeta_2"sv);
 	phy::set_ic(p3,{-5.,0.,0.},{0.,10.,0.},10,0.1, "Pianeta_3"sv);
 
-	vector<phy::Planet> planets{p1,p2,p3};
+	vector planets{p1,p2};
 
 	double h = 0.0001;
 	double start = 0;
 	double end = 10;
 
 	rk3::RK3_solver rk3_s(planets, h, start, end, 0.01);
-	rk4::RK4_solver rk4_s(planets, h, start, end, 0.01);
-	rk5::RK5_solver rk5_s(planets, h, start, end, 0.01);
+	//rk4::RK4_solver rk4_s(planets, h, start, end, 0.01);
+	//rk5::RK5_solver rk5_s(planets, h, start, end, 0.01);
 
 
 	rk3_s.set_save(save_path3,true,h*20);
-	rk4_s.set_save(save_path4, true, h*20);
-	rk5_s.set_save(save_path5, true, h*20);
+	//rk4_s.set_save(save_path4, true, h*20);
+	//rk5_s.set_save(save_path5, true, h*20);
 
 
 
@@ -87,11 +87,11 @@ void solver_test() {
 	cout << "completa" << endl;
 
 	cout << "Simulazione con rk4" << endl;
-	rk4_s.solve();
+	//rk4_s.solve();
 	cout << "completa" << endl;
 
 	cout << "Simulazione con rk5" << endl;
-	rk5_s.solve();
+	//rk5_s.solve();
 	cout << "completa" << endl;
 
 
@@ -102,7 +102,7 @@ void plot_tra(std::string_view path,std::string_view plt_name) {
 
 	std::string out1 = std::string(path) + "Pianeta_1";
 	std::string out2 = std::string(path) + "Pianeta_2";
-	std::string out3 = std::string(path) + "Pianeta_3";
+	std::string out3 = std::string(path) + "Pianeta_2Pianeta_1";
 	Data_info d1 {"Pt_1 tra",out1};
 	Data_info d2 {"Pt_2 tra",out2};
 	Data_info d3 {"Pt_3 tra",out3};

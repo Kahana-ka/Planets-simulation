@@ -147,6 +147,8 @@ bool Solver_base<size>::are_colliding(const Planet_solver<size>& p1, const Plane
 template<int size>
 void Solver_base<size>::handle_collision() {
 
+	std::vector<phy::Planet> new_planets;
+
 	for (auto current = planets_solver.begin(); current != planets_solver.end(); ++current) {
 		if (current->dead)
 			continue;
@@ -161,17 +163,21 @@ void Solver_base<size>::handle_collision() {
 
 				//Creo il nuovo pianeta e lo aggiungo al solver
 				phy::Planet new_planet = merge_planet(*planet,*current);
-				add_planet(new_planet);
 
-				//creo il file
-				create_file(planets_solver.back());
+				new_planets.push_back(new_planet);
 
 
 				// Gli flaggo
 				current->dead = true;
 				planet->dead = true;
+
 			}
 		}
+	}
+
+	for (auto planet : new_planets) {
+		add_planet(planet);
+		create_file(planets_solver.back());
 	}
 
 	remove_dead_planets();
@@ -315,7 +321,7 @@ void Solver_base<size>::remove_dead_planets() {
 	auto it = std::find_if(planets_solver.begin(), planets_solver.end(),[](const Planet_solver<size>& p) {return p.dead;});
 	while (it != planets_solver.end()) {
 		planets_solver.erase(it);
-		it = std::find_if(planets_solver.begin(), planets_solver.end(),[](const Planet_solver<size>& p) {return !p.dead;});
+		it = std::find_if(planets_solver.begin(), planets_solver.end(),[](const Planet_solver<size>& p) {return p.dead;});
 	}
 }
 
