@@ -17,16 +17,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(rk_solvers
-            include/runge_kutta.h
-            src/runge_kutta.cpp
-            include/solver_runge_kutta_3.h
-            src/solver_runge_kutta_3.cpp
-            include/solver_runge_kutta_4.h
-            src/solver_runge_kutta_4.cpp
-            include/solver_runge_kutta_5.h
-            src/solver_runge_kutta_5.cpp
-            include/solver_runge_kutta_adaptive.h
-            src/solver_runge_kutta_adaptive.cpp
+        include/Solver_base.h
+        include/solver_runge_kutta_3.h
+        src/solver_runge_kutta_3.cpp
+        include/solver_runge_kutta_4.h
+        src/solver_runge_kutta_4.cpp
+        include/solver_runge_kutta_5.h
+        src/solver_runge_kutta_5.cpp
+ #           include/solver_runge_kutta_adaptive.h
+ #           src/solver_runge_kutta_adaptive.cpp
             )
 
 add_library(phy include/phy.h src/phy.cpp)

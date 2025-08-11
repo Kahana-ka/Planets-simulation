@@ -7,12 +7,12 @@
 #include "phy.h"
 #include <format>
 #include <tuple>
-#include "runge_kutta.h"
+#include "Solver_base.h"
 
 namespace rk3 {
 
 
-	enum coeff {
+	enum Coefficient_index {
 		K1 = 0,
 		K2 = 1,
 		K3 = 2,
@@ -41,9 +41,6 @@ namespace rk3 {
 	class RK3_solver : public Solver_base<3> {
 
 		void next_step() override;
-
-		//Quanti dati tenere a ogni salvataggio
-		static constexpr int data_keep = 1;
 
 	public:
 		//Costruttore 

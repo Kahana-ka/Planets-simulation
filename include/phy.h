@@ -17,10 +17,13 @@ namespace phy {
 		Vector3 operator-(const Vector3& rv3) const;
 		Vector3 operator/(double rh_value) const;
 		Vector3 operator*(double rh_value) const;
+		Vector3& operator+=(const Vector3& rv3);
+
 		double module() const;
 		double dot(const Vector3& v3) const;
 		Vector3 cross(const Vector3& v3) const;
 		double distance(const Vector3& v3) const;
+
 	};
 
 	struct Planet {
@@ -77,7 +80,7 @@ namespace phy {
 	*/
 	double gravity_calc_z(double  mass_p2, const Vector3& position_p1, const Vector3& position_p2 );
 
-
+	Vector3 gravity_calc (double  mass_p2, const Vector3 &planet_1, const Vector3 &planet_2);
 }
 
 #endif // !PHY
