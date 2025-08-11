@@ -24,6 +24,18 @@ namespace Point_attribute {
     };
 }
 
+
+
+struct Timeline {
+    std::vector<int> row_start;
+    std::vector<int> row_end;
+    std::vector<std::string_view> files;
+};
+
+std::vector<Timeline> make_timeline(std::vector<std::string_view> files);
+
+std::string last_line(std::string file);
+
 class Data_info {
 
 public:
@@ -131,8 +143,10 @@ private:
 
     void gnu_plot_command_w_sync(std::string_view command);
 
-public:
 
+
+public:
+    std::string join_files_position();
     explicit Gnu_plotter(const std::vector<Data_info>& data);
 
     Gnu_plotter(const std::vector<Data_info>& data,std::string_view save_path,const std::pair<int,int>& resolution);
@@ -148,11 +162,11 @@ public:
     std::string multi_curve_plot(const std::vector<std::tuple<int,int>>& columns,const std::pair<int,int>& layout,const std::vector<Axis_limits>& a_limit,std::string_view plot_name="");
     std::string multi_curve_plot(const std::vector<std::tuple<int,int,int>>& columns,const std::pair<int,int>& layout,const std::vector<Axis_limits>& a_limit,std::string_view plot_name="");
 
-    std::string animate_curve_plot(int x_column,int y_column,int z_column,std::string_view plot_name,int tail,int frequency,int fps);
-    std::string animate_curve_plot(int x_column,int y_column,int z_column,const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot_trajectory_3d(std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot_trajectory_3d(const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
 
-    std::string animate_curve_plot(int x_column,int y_column,std::string_view plot_name,int tail,int frequency,int fps);
-    std::string animate_curve_plot(int x_column,int y_column,const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot_trajectory_2d(std::string_view plot_name,int tail,int frequency,int fps);
+    std::string animate_curve_plot_trajectory_2d(const Axis_limits& a_limit,std::string_view plot_name,int tail,int frequency,int fps);
 
 
 };
