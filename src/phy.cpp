@@ -3,23 +3,26 @@
 
 
 phy::Vector3 phy::Vector3::operator+(const Vector3& rv3) const {
-    return {x+rv3.x,y+rv3.y,z+rv3.z};
+    return {this->x+rv3.x,this->y+rv3.y,this->z+rv3.z};
 }
 
 phy::Vector3 phy::Vector3::operator-(const Vector3& rv3) const {
-    return {x-rv3.x,y-rv3.y,z-rv3.z};
+    return {this->x-rv3.x,this->y-rv3.y,this->z-rv3.z};
 }
 
 phy::Vector3 phy::Vector3::operator/(const double rh_value) const {
-    return {x/rh_value,y/rh_value,z/rh_value};
+    return {this->x/rh_value,this->y/rh_value,this->z/rh_value};
 }
 
 phy::Vector3 phy::Vector3::operator*(const double rh_value) const {
-    return {x*rh_value,y*rh_value,z*rh_value};
+    return  {this->x*rh_value,this->y*rh_value,this->z*rh_value};
 }
 
-phy::Vector3 phy::Vector3::operator+=(const Vector3& rv3) const {
-    return {x+rv3.x,y+rv3.y,z+rv3.z};
+phy::Vector3& phy::Vector3::operator+=(const Vector3& rv3) {
+    x += rv3.x;
+    y += rv3.y;
+    z += rv3.z;
+    return *this;
 }
 
 double phy::Vector3::module() const {
@@ -52,7 +55,9 @@ void phy::set_ic(Planet& planet,const Vector3& position,const Vector3& speed, co
 }
 
 double phy::gravity_calc_x(const double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 ) {
-    return mass_p2/pow( position_p1.distance(position_p2) ,3) * (position_p2.x - position_p1.x);
+    auto d = position_p1.distance(position_p2);
+    auto dis = (position_p2.x - position_p1.x);
+    return mass_p2/std::pow( d ,3) * dis;
 }
 
 double phy::gravity_calc_y(const double  mass_p2,const Vector3& position_p1, const Vector3& position_p2 ) {

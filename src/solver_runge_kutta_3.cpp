@@ -15,6 +15,7 @@ phy::Vector3 rk3::gravity_k1(const Planet_solver<3>& self,const std::vector<Plan
 		if (pl.id == self.id || pl.dead)
 			continue;
 		k += phy::gravity_calc(pl.mass,self.position.back(),pl.position.back());
+
 	}
 
 	return k*h;
@@ -45,11 +46,11 @@ phy::Vector3 rk3::gravity_k2(const Planet_solver<3>& self,const std::vector<Plan
 }
 
 phy::Vector3 rk3::position_k2(const Planet_solver<3>& self, const double h) {
-	return arg_k2(self.position.back(),self.k_position[K1]) * h;
+	return arg_k2(self.speed.back(),self.k_speed[K1]) * h;
 }
 
 phy::Vector3 rk3::arg_k2(const phy::Vector3 &param , const phy::Vector3 &k1) {
-	return (param + k1) / 3.;
+	return param + (k1 / 3.);
 }
 
 //k3
@@ -72,17 +73,17 @@ phy::Vector3 rk3::gravity_k3(const Planet_solver<3>& self,const std::vector<Plan
 }
 
 phy::Vector3 rk3::position_k3(const Planet_solver<3>& self, const double h) {
-	return arg_k3(self.position.back(),self.k_position[K2]) * h;
+	return arg_k3(self.speed.back(),self.k_speed[K2]) * h;
 }
 
 phy::Vector3 rk3::arg_k3(const phy::Vector3 &param , const phy::Vector3 &k2) {
-	return (param + k2) / (3.*2);
+	return param + (k2 / (2.*3.));
 }
 
 // ~~~~~~~~~~~ Funzioni per calcolare lo step successivo
 
 phy::Vector3 rk3::next_point(const phy::Vector3 &w, const std::array<phy::Vector3,3> &param , const double h) {
-	return w + ( param[K1] / h + param[K3] * 3.) * h /4.;
+	return w + ( param[K1] / h + param[K3] * 3./h) * h /4.;
 }
 
 void rk3::next_step(std::vector<Planet_solver<3>>& ps,const double h) {
