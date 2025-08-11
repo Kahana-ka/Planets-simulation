@@ -154,6 +154,7 @@ phy::Vector3 rk5::arg_k6(const phy::Vector3 &param, const std::array<phy::Vector
 phy::Vector3 rk5::next_point(const phy::Vector3 &w, const std::array<phy::Vector3,6> &k) {
 	return w + k[K1]*16./135. + k[K2]*0. + k[K3]*6656./12825. + k[K4]*28561./56430. - k[K5]*9./50. + k[K6]*2./55.;
 }
+
 void rk5::next_step(std::vector<Planet_solver<6>>& ps,const double h) {
 
 	//Calc k1
@@ -164,6 +165,8 @@ void rk5::next_step(std::vector<Planet_solver<6>>& ps,const double h) {
 
 		pl.k_speed[K1] = gravity_k1(pl,ps,h);
 		pl.k_position[K1] = position_k1(pl,h);
+
+		pl.acceleration.push_back(pl.k_speed[K1]*h);
 	}
 
 	//Calc k2

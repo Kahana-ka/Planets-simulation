@@ -95,6 +95,8 @@ void rk3::next_step(std::vector<Planet_solver<3>>& ps,const double h) {
 
 		pl.k_speed[K1] = gravity_k1(pl,ps,h);
 		pl.k_position[K1] = position_k1(pl,h);
+
+		pl.acceleration.push_back(pl.k_speed[K1]*h);
 	}
 
 	//Calc k2

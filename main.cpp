@@ -69,21 +69,40 @@ void solver_test() {
 	rk5::RK5_solver rk5_s(planets, h, start, end, 0.01);
 
 
-	rk3_s.set_save(save_path3,false,h*10);
-	rk4_s.set_save(save_path4, false, h*10);
-	rk5_s.set_save(save_path5, false, h*10);
+	rk3_s.set_save(save_path3,true,h*20);
+	rk4_s.set_save(save_path4, true, h*20);
+	rk5_s.set_save(save_path5, true, h*20);
 
 
-	rk3_s.solve();
-	rk4_s.solve();
-	rk5_s.solve();
+
+
+	cout << "Simulazione con rk3" << endl;
+	//rk3_s.solve();
+	cout << "completa" << endl;
+
+	cout << "Simulazione con rk4" << endl;
+	//rk4_s.solve();
+	cout << "completa" << endl;
+
+	cout << "Simulazione con rk5" << endl;
+	//rk5_s.solve();
+	cout << "completa" << endl;
+
+	cout << "creazione plot" << endl;
+	plot(save_path3,"trajectory_3");
+	plot(save_path4,"trajectory_4");
+	plot(save_path5,"trajectory_5");
 }
 
 
 void plot(std::string_view path,std::string_view plt_name) {
-	Data_info d1 {"Pt_1 tra",std::string(path) + "Pianeta_1"};
-	Data_info d2 {"Pt_2 tra",std::string(path) + "Pianeta_2"};
-	Data_info d3 {"Pt_3 tra",std::string(path) + "Pianeta_3"};
+
+	std::string out1 = std::string(path) + "Pianeta_1";
+	std::string out2 = std::string(path) + "Pianeta_2";
+	std::string out3 = std::string(path) + "Pianeta_3";
+	Data_info d1 {"Pt_1 tra",out1};
+	Data_info d2 {"Pt_2 tra",out2};
+	Data_info d3 {"Pt_3 tra",out3};
 
 	//Settaggio
 	d1.set_line_style({Line_attribute::none,"",3});
