@@ -7,28 +7,21 @@
 //K1
 
 phy::Vector3 rk3::gravity_k1(const Planet_solver<3>& self,const std::vector<Planet_solver<3>>& planets_solver,const double h) {
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
-	//Viene fatta per tutti i pianeti meno se stesso.
+
+	phy::Vector3 k{0.,0.,0.};
+
+
 	for (auto& pl : planets_solver) {
 		if (pl.id == self.id || pl.dead)
 			continue;
-
-		kx += phy::gravity_calc_x(pl.mass, self.position.back(), pl.position.back());
-		ky += phy::gravity_calc_y(pl.mass, self.position.back(), pl.position.back());
-		kz += phy::gravity_calc_z(pl.mass, self.position.back(), pl.position.back());
+		k += phy::gravity_calc(pl.mass,self.position.back(),pl.position.back());
 	}
 
-	return {kx * h, ky * h, kz * h};
+	return k*h;
 }
 
 phy::Vector3 rk3::position_k1(const Planet_solver<3>& self,const double h) {
-	const auto temp = self.speed.back();
-	const double kx = temp.x;
-	const double ky = temp.y;
-	const double kz = temp.z;
-	return {kx * h, ky * h,kz * h};
+	return self.speed.back() * h;
 }
 
 //K2
@@ -37,9 +30,7 @@ phy::Vector3 rk3::gravity_k2(const Planet_solver<3>& self,const std::vector<Plan
 	
 	using std::get;
 
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
 	for (auto& pl : (planets_solver)) {
 		if (pl.id == self.id || pl.dead)
@@ -47,13 +38,10 @@ phy::Vector3 rk3::gravity_k2(const Planet_solver<3>& self,const std::vector<Plan
 
 		const auto p1 = arg_k2(self.position.back(),self.k_position[K1]);
 		const auto p2 = arg_k2(pl.position.back(),pl.k_position[K1]);
-
-		kx += phy::gravity_calc_x(pl.mass, p1,p2);
-		ky += phy::gravity_calc_y(pl.mass, p1,p2);
-		kz += phy::gravity_calc_z(pl.mass, p1,p2);
+		k += phy::gravity_calc(pl.mass,p1,p2);
 	}
 
-	return {kx * h, ky * h, kz * h};
+	return k*h;
 }
 
 phy::Vector3 rk3::position_k2(const Planet_solver<3>& self, const double h) {
@@ -68,9 +56,7 @@ phy::Vector3 rk3::arg_k2(const phy::Vector3 &param , const phy::Vector3 &k1) {
 
 phy::Vector3 rk3::gravity_k3(const Planet_solver<3>& self,const std::vector<Planet_solver<3>>& planets_solver,const double h) {
 	
-	double kx = 0;
-	double ky = 0;
-	double kz = 0;
+	phy::Vector3 k{0.,0.,0.};
 
 	for (auto& pl : planets_solver) {
 		if (pl.id == self.id || pl.dead)
@@ -78,13 +64,11 @@ phy::Vector3 rk3::gravity_k3(const Planet_solver<3>& self,const std::vector<Plan
 
 		const auto p1 = arg_k3(self.position.back(),self.k_position[K2]);
 		const auto p2 = arg_k3(pl.position.back(),pl.k_position[K2]);
+		k += phy::gravity_calc(pl.mass,p1,p2);
 
-		kx += phy::gravity_calc_x(pl.mass, p1,p2);
-		ky += phy::gravity_calc_y(pl.mass, p1,p2);
-		kz += phy::gravity_calc_z(pl.mass, p1,p2);
 	}
 
-	return {kx * h, ky * h,kz * h};
+	return k*h;
 }
 
 phy::Vector3 rk3::position_k3(const Planet_solver<3>& self, const double h) {

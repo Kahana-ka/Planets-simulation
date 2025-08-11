@@ -12,7 +12,7 @@
 namespace rk3 {
 
 
-	enum coeff {
+	enum Coefficient_index {
 		K1 = 0,
 		K2 = 1,
 		K3 = 2,
