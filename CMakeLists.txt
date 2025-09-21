@@ -37,7 +37,10 @@ add_library(gnu_plot include/gnuplot-iostream.h
 
 add_library(sys_utils include/sys_utils.h
                       src/sys_utils.cpp
+                      include/input_reader.h
+                      src/input_reader.cpp
             )
+
 
 
 # Crea l'eseguibile

@@ -12,6 +12,7 @@
 #include "solver_runge_kutta_5.h"
 #include "gnuplotting.h"
 #include <filesystem>
+#include "input_reader.h"
 
 // Name space abbreviation
 using std::vector;
@@ -28,20 +29,24 @@ constexpr std::string_view save_path5 = "Out/p5/";
 
 constexpr std::string_view plot_out = "Plot/";
 
-std::vector<Data_info::Data_label> coll_labels{
-	{"Time", ""},
-	{"Position x", ""},
-	{"Position y", ""},
-	{"Position z", ""},
-	{"Speed x", ""},
-	{"Speed y", ""},
-	{"Speed z", ""}
-};
+// std::vector<Data_info::Data_label> coll_labels{
+// 	{"Time", ""},
+// 	{"Position x", ""},
+// 	{"Position y", ""},
+// 	{"Position z", ""},
+// 	{"Speed x", ""},
+// 	{"Speed y", ""},
+// 	{"Speed z", ""}
+// };
 
-int main() {
+int main(int argc, char** argv) {
 
-	solver_test();
-	plot_trajectory(save_path3,"trajectory");
+	if (argc < 2) {
+		std::cout <<  "Missing file" << std::endl;
+	}
+
+	InputReader input_reader{argv[1]};
+	input_reader.read_input();
 
 	return 0;
 }
@@ -91,24 +96,24 @@ void solver_test() {
 }
 
 
-void plot_trajectory(std::string_view dir,std::string_view plt_name) {
-
-	std::vector<Data_info> data;
-	int temp = 1;
-	for (const auto & entry : std::filesystem::directory_iterator(dir)) {
-		std::string out = std::string(entry.path());
-		data.emplace_back("Pt_" + std::to_string(temp) + " tra",out);
-		data.back().set_line_style({Line_attribute::none,"",3});
-		data.back().set_point_style({Point_attribute::none,3});
-		data.back().add_column_name(coll_labels);
-		temp++;
-	}
-
-
-	Gnu_plotter gp{data,std::string(plot_out),{1920,1080}};
-	Gnu_plotter::Axis_limits a{-15,15,-10,40,-40,10};
-
-	//gp.curve_plot(2,3,4,plt_name);
-	gp.animate_curve_plot(2,3,4,a,plt_name,2000,300,60);
-}
+// void plot_trajectory(std::string_view dir,std::string_view plt_name) {
+//
+// 	std::vector<Data_info> data;
+// 	int temp = 1;
+// 	for (const auto & entry : std::filesystem::directory_iterator(dir)) {
+// 		std::string out = std::string(entry.path());
+// 		data.emplace_back("Pt_" + std::to_string(temp) + " tra",out);
+// 		data.back().set_line_style({Line_attribute::none,"",3});
+// 		data.back().set_point_style({Point_attribute::none,3});
+// 		data.back().add_column_name(coll_labels);
+// 		temp++;
+// 	}
+//
+//
+// 	Gnu_plotter gp{data,std::string(plot_out),{1920,1080}};
+// 	Gnu_plotter::Axis_limits a{-15,15,-10,40,-40,10};
+//
+// 	//gp.curve_plot(2,3,4,plt_name);
+// 	gp.animate_curve_plot(2,3,4,a,plt_name,2000,300,60);
+// }
 

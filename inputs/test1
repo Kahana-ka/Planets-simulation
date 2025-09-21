@@ -1,0 +1,40 @@
+
+param{
+    step =
+    start_time =
+    end_time =
+    collision_tollerance  =
+}
+
+planet{
+    speed = 0,0
+    position = 0,0
+    radius = 0.1
+    mass = 10000
+    name = terra
+}
+
+planet{
+    speed = 0,1.
+    position = 5,0
+    radius = 0.1
+    mass = 10000
+    name = sat2
+}
+
+planet{
+    speed = 0,-1.
+    position = -5,0
+    radius = 0.1
+    mass = 10000
+    name = sat1
+}
+
+save{
+    data_path = path
+    plot_path = path
+}
+
+plot{
+
+}
