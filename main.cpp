@@ -13,83 +13,79 @@
 #include <filesystem>
 #include "input_reader.h"
 
-
-using std::vector;
-using std::cout;
-using std::endl;
-
-void solver_test();
-void plot_trajectory(std::string_view path,std::string_view plt_name);
-
-
-constexpr std::string_view save_path3 = "Out/p3/";
-constexpr std::string_view save_path4 = "Out/p4/";
-constexpr std::string_view save_path5 = "Out/p5/";
-
-constexpr std::string_view plot_out = "Plot/";
-
-// std::vector<Data_info::Data_label> coll_labels{
-// 	{"Time", ""},
-// 	{"Position x", ""},
-// 	{"Position y", ""},
-// 	{"Position z", ""},
-// 	{"Speed x", ""},
-// 	{"Speed y", ""},
-// 	{"Speed z", ""}
-// };
+void start_simulation(const std::vector<phy::Planet>& planets,const InputReader::Sim& param);
 
 int main(int argc, char** argv) {
+std::cout << ""
+	" _______   __                                  __             ______   __                          __              __      __                     \n"
+	"/       \\ /  |                                /  |           /      \\ /  |                        /  |            /  |    /  |                    \n"
+	"$$$$$$$  |$$ |  ______   _______    ______   _$$ |_         /$$$$$$  |$$/  _____  ____   __    __ $$ |  ______   _$$ |_   $$/   ______   _______  \n"
+	"$$ |__$$ |$$ | /      \\ /       \\  /      \\ / $$   |        $$ \\__$$/ /  |/     \\/    \\ /  |  /  |$$ | /      \\ / $$   |  /  | /      \\ /       \\ \n"
+	"$$    $$/ $$ | $$$$$$  |$$$$$$$  |/$$$$$$  |$$$$$$/         $$      \\ $$ |$$$$$$ $$$$  |$$ |  $$ |$$ | $$$$$$  |$$$$$$/   $$ |/$$$$$$  |$$$$$$$  |\n"
+	"$$$$$$$/  $$ | /    $$ |$$ |  $$ |$$    $$ |  $$ | __        $$$$$$  |$$ |$$ | $$ | $$ |$$ |  $$ |$$ | /    $$ |  $$ | __ $$ |$$ |  $$ |$$ |  $$ |\n"
+	"$$ |      $$ |/$$$$$$$ |$$ |  $$ |$$$$$$$$/   $$ |/  |      /  \\__$$ |$$ |$$ | $$ | $$ |$$ \\__$$ |$$ |/$$$$$$$ |  $$ |/  |$$ |$$ \\__$$ |$$ |  $$ |\n"
+	"$$ |      $$ |$$    $$ |$$ |  $$ |$$       |  $$  $$/       $$    $$/ $$ |$$ | $$ | $$ |$$    $$/ $$ |$$    $$ |  $$  $$/ $$ |$$    $$/ $$ |  $$ |\n"
+	"$$/       $$/  $$$$$$$/ $$/   $$/  $$$$$$$/    $$$$/         $$$$$$/  $$/ $$/  $$/  $$/  $$$$$$/  $$/  $$$$$$$/    $$$$/  $$/  $$$$$$/  $$/   $$/ \n\n\n";
 
 	if (argc < 2) {
 		std::cout <<  "Missing file" << std::endl;
 	}
+	std::cout << "Reading file" << std::endl;
 
-//	InputReader input_reader{argv[1]};
-//	input_reader.read_input();
+	InputReader input_reader{std::string(argv[1])};
+	input_reader.read_input();
+
+	const std::vector<phy::Planet> planets = input_reader.get_planets();
+	const std::vector<InputReader::Sim> sim_param = input_reader.get_sims();
+	std::cout << "Done" << std::endl << std::endl;
+	std::cout << "Number of simulations: " << sim_param.size() << std::endl;
+
+	if (sim_param.empty()) {
+		return -1;
+	}
+
+	for (const auto& sim : sim_param) {
+		std::cout << "starting simulation" << std::endl;
+		start_simulation(planets, sim);
+		std::cout << "DONE" << std::endl << std::endl;
+	}
 
 	return 0;
 }
 
+void start_simulation(const std::vector<phy::Planet>& planets,const InputReader::Sim& param) {
+
+	if (!std::filesystem::exists(param.save_path)) {
+		std::cout << "Directory not found" << std::endl;
+		std::cout << "Creating directory" << std::endl;
+		std::filesystem::create_directories(param.save_path);
+	}
+
+	std::cout << "Directory found" << std::endl;
 
 
-void solver_test() {
+	switch (param.model) {
+		case InputReader::RK3: {
+			rk3::RK3_solver rk3_solver{planets,param.step,param.start_time,param.end_time,param.collision_toll};
+			rk3_solver.set_save(param.save_path,param.save_all,param.save_every);
+			rk3_solver.solve();
+			break;
+		}
+		case InputReader::RK4: {
+			rk4::RK4_solver rk4_solver{planets,param.step,param.start_time,param.end_time,param.collision_toll};
+			rk4_solver.set_save(param.save_path,param.save_all,param.save_every);
+			rk4_solver.solve();
+			break;
+		}
 
-	using namespace std::literals;
-	phy::Planet p1{};
-	phy::Planet p2{};
-	phy::Planet p3{};
-	phy::Planet p4{};
-
-	phy::set_ic(p1,{0.,0.,0.},{1.,1.,0.},1000,0.1, "Pianeta_1"sv);
-	phy::set_ic(p2, {0.,11.,0.},{-1.,1.,0.},10,0.1, "Pianeta_2"sv);
-	phy::set_ic(p3,{-15.,0.,0.},{0.,1.,0.},10,0.1, "Pianeta_3"sv);
-	phy::set_ic(p4,{0.,0.,15.},{-1.,0.4,-1.},100,0.1, "Pianeta_4"sv);
-
-	vector planets{p1,p2,p3,p4};
-
-	double h = 0.0001;
-	double start = 0;
-	double end = 10;
-
-	rk3::RK3_solver rk3_s(planets, h, start, end, 0.01);
-	//rk4::RK4_solver rk4_s(planets, h, start, end, 0.01);
-	//rk5::RK5_solver rk5_s(planets, h, start, end, 0.01);
-
-	rk3_s.set_save(save_path3,true,h*20);
-	//rk4_s.set_save(save_path4, true, h*20);
-	//rk5_s.set_save(save_path5, true, h*20);
-
-	cout << "Simulazione con rk3" << endl;
-	rk3_s.solve();
-	cout << "completa" << endl;
-
-	//cout << "Simulazione con rk4" << endl;
-	//rk4_s.solve();
-	//cout << "completa" << endl;
-
-	//cout << "Simulazione con rk5" << endl;
-	//rk5_s.solve();
-	//cout << "completa" << endl;
-
-
+		case InputReader::RK5: {
+			rk5::RK5_solver rk5_solver{planets,param.step,param.start_time,param.end_time,param.collision_toll};
+			rk5_solver.set_save(param.save_path,param.save_all,param.save_every);
+			rk5_solver.solve();
+			break;
+		}
+		default:
+		std::cout << "Not yet implemented" << std::endl;
+		break;
+	}
 }

@@ -1,9 +1,35 @@
 
-param{
-    step =
-    start_time =
-    end_time =
-    collision_tollerance  =
+sim{
+    step = 0.00001
+    start_time = 0
+    end_time = 10
+    collision_tollerance  = 0.0001
+    model = rk3
+    save_path = ./Out/sim_rk3/
+    save_all = true
+    save_every = 100
+}
+
+sim{
+    step = 0.00001
+    start_time = 0
+    end_time = 10
+    collision_tollerance  = 0.0001
+    model = rk4
+    save_path = ./Out/sim_rk4/
+    save_all = true
+    save_every = 100
+}
+
+sim{
+    step = 0.00001
+    start_time = 0
+    end_time = 10
+    collision_tollerance  = 0.0001
+    model = rk5
+    save_path = ./Out/sim_rk5/
+    save_all = true
+    save_every = 100
 }
 
 planet{
@@ -30,11 +56,3 @@ planet{
     name = sat1
 }
 
-save{
-    data_path = path
-    plot_path = path
-}
-
-plot{
-
-}

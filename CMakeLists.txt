@@ -46,7 +46,7 @@ add_executable(Planets_simulation main.cpp)
 target_include_directories(Planets_simulation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
 #Linka le librerie di boost
-
+target_link_libraries(Planets_simulation PRIVATE sys_utils)
 target_link_libraries(Planets_simulation PRIVATE rk_solvers)
 target_link_libraries(Planets_simulation PRIVATE phy)
 

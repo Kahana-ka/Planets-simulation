@@ -16,6 +16,14 @@ InputReader::InputReader(const std::string &path){
 
 }
 
+std::vector<phy::Planet> InputReader::get_planets() {
+    return planets;
+}
+
+std::vector<InputReader::Sim> InputReader::get_sims() {
+    return sims;
+}
+
 
 void InputReader::read_input() {
 
@@ -64,17 +72,11 @@ void InputReader::read_input() {
 void InputReader::parser_dispatcher(const Type_field field,const std::string_view line) {
     try {
         switch (field) {
-            case PARAMETERS:
+            case SIM:
                 parse_parameters(line);
                 break;
             case PLANET:
                 parse_planet(line);
-                break;
-            case PLOT:
-                parse_plot(line);
-                break;
-            case SAVE:
-                parse_save(line);
                 break;
             default:
                 break;
@@ -83,14 +85,106 @@ void InputReader::parser_dispatcher(const Type_field field,const std::string_vie
 
 }
 
-void InputReader::parse_parameters(const std::string_view line){}
+void InputReader::parse_parameters(const std::string_view line) {
+    std::vector<std::string> tokens;
+    boost::split(tokens, line, boost::is_any_of(""s+assignment_char));
+    if (tokens.size() != 2) {
+        std::cout << "Invalid value on line " << current_line << std::endl;
+        return;
+    }
 
+    if (sim_map.contains(tokens[0])) {
+        try {
+            switch (sim_map.at(tokens[0])) {
+                case STEP:
+                    if (!sim_setted_field.step) {
+                        temp_sim.step = std::stod(tokens[1]);
+                        sim_setted_field.step = true;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case START_TIME:
+                    if (!sim_setted_field.start_time) {
+                        temp_sim.start_time = std::stod(tokens[1]);
+                        sim_setted_field.start_time = true;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case END_TIME:
+                    if (!sim_setted_field.end_time) {
+                        temp_sim.end_time= std::stod(tokens[1]);
+                        sim_setted_field.end_time = true;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case COLLISION_TOLL:
+                    if (!sim_setted_field.collision_toll) {
+                        temp_sim.collision_toll = std::stod(tokens[1]);
+                        sim_setted_field.collision_toll = true;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case MODEL:
+                    if (!sim_setted_field.model) {
+                        if (!model_map.contains(tokens[1])) {
+                            std::cout << "Model not found" << std::endl;
+                            return;
+                        }
+                        temp_sim.model = model_map.at(tokens[1]);
+                        sim_setted_field.model = true;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case SAVE_PATH:
+                    if (!sim_setted_field.save_path) {
+                        temp_sim.save_path = tokens[1];
+                        sim_setted_field.save_path = true;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case SAVE_EVERY:
+                    if (!sim_setted_field.save_every) {
+                        temp_sim.save_every = std::stoi(tokens[1]);
+                        sim_setted_field.save_every = true;
+                    } else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+                case SAVE_ALL:
+                    if (!sim_setted_field.save_all) {
+                        if (tokens[1] == "true") {
+                            temp_sim.save_all = true;
+                            sim_setted_field.save_all = true;
+                        }else if (tokens[1] == "false") {
+                            temp_sim.save_all = false;
+                            sim_setted_field.save_all = true;
+                        }else
+                            std::cout << "Invalid field" << std::endl;
+                    }else {
+                        std::cout << "Field alrady setted" << std::endl;
+                    }
+                    break;
+
+            }
+
+        }catch(std::invalid_argument &e){ throw; }
+    }else {
+        std::cout << "Field not existing: " << tokens[0] << std::endl;
+    }
+
+}
 
 void InputReader::parse_planet(const std::string_view line) {
     std::vector<std::string> tokens;
     boost::split(tokens,line,boost::is_any_of(""s+assignment_char));
-    if (tokens.size() > 2) {
-        std::cout << "Too many " << assignment_char << std::endl;
+    if (tokens.size() != 2) {
+        std::cout << "Invalid value on line " << current_line << std::endl;
         return;
     }
 
@@ -177,10 +271,6 @@ void InputReader::parse_planet(const std::string_view line) {
 
 }
 
-void InputReader::parse_plot(const std::string_view line){}
-
-void InputReader::parse_save(const std::string_view line){}
-
 void InputReader::finalize_parse_field(const Type_field type) {
 
     switch (type) {
@@ -205,7 +295,31 @@ void InputReader::finalize_parse_field(const Type_field type) {
             planet_in_construction.speed.clear();
             planet_in_construction.position.clear();
             break;
+        case SIM:
+
+            if (sim_setted_field.collision_toll &&
+                sim_setted_field.end_time &&
+                sim_setted_field.start_time &&
+                sim_setted_field.step &&
+                sim_setted_field.save_all &&
+                sim_setted_field.save_path &&
+                sim_setted_field.save_every) {
+                sims.emplace_back(temp_sim);
+
+            } else {
+                std::cout << "Missing fields" << std::endl;
+            }
+            sim_setted_field.step = false;
+            sim_setted_field.start_time = false;
+            sim_setted_field.collision_toll = false;
+            sim_setted_field.end_time = false;
+            sim_setted_field.model = false;
+            sim_setted_field.save_path = false;
+            sim_setted_field.save_all = false;
+            sim_setted_field.save_every = false;
+            break;
         default: ;
     }
 
 }
+
