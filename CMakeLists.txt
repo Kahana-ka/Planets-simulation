@@ -30,11 +30,6 @@ add_library(rk_solvers
 
 add_library(phy include/phy.h src/phy.cpp)
 
-add_library(gnu_plot include/gnuplot-iostream.h
-                     include/gnuplotting.h
-                     src/gnuplotting.cpp
-            )
-
 add_library(sys_utils include/sys_utils.h
                       src/sys_utils.cpp
                       include/input_reader.h
@@ -51,10 +46,8 @@ add_executable(Planets_simulation main.cpp)
 target_include_directories(Planets_simulation PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
 #Linka le librerie di boost
-target_link_libraries(gnu_plot PUBLIC ${Boost_LIBRARIES})
 
-target_link_libraries(gnu_plot PUBLIC sys_utils)
 target_link_libraries(Planets_simulation PRIVATE rk_solvers)
 target_link_libraries(Planets_simulation PRIVATE phy)
-target_link_libraries(Planets_simulation PRIVATE gnu_plot)
+
 
